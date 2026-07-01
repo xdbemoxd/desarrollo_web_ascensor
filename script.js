@@ -2,19 +2,26 @@ const $lucesDelCiruclo = document.querySelectorAll('.piso');
 const $botones = document.querySelectorAll('.button_t')
 let contadorDeLuz = 0;
 let enMovimiento = false;
+let listaVisitar = [];
+let indiceactual = 0;
 
 const esperar = (milisegundos) => new Promise(resolve => setTimeout(resolve, milisegundos));
 
 const mostrarLuz = async ( actual ) => {
     $lucesDelCiruclo[ actual ].className = 'piso';
 
-    $botones.forEach(btn => btn.disabled = true);
+   
 
-    if (enMovimiento) return
+    if (enMovimiento){
+        listaVisitar.push(actual);
+        return;
+    } 
 
     enMovimiento = true
     
     if( contadorDeLuz < actual ){
+
+        console.log( listaVisitar );
 
         while( contadorDeLuz < actual ){
 
@@ -30,7 +37,10 @@ const mostrarLuz = async ( actual ) => {
 
         }
     }else{
+
         if ( contadorDeLuz > actual ) {
+
+            console.log( listaVisitar );
 
             while( contadorDeLuz > actual ){
 
@@ -53,15 +63,17 @@ const mostrarLuz = async ( actual ) => {
     await esperar(3000);
     luzDestino.classList.remove(luzDestino.getAttribute('color'));
 
-    $botones.forEach(btn => btn.disabled = false);
+    
 
     enMovimiento = false
+
+    if ( listaVisitar.length > indiceactual ) {
+
+        mostrarLuz( listaVisitar[ indiceactual ] );
+
+        indiceactual++;
+        
+    }
    
 }
 
-$botones.forEach((boton, index) => {
-    boton.addEventListener('click', () => {
-        // Al hacer clic, llamamos a la función pasándole el índice (0, 1, 2, 3...)
-        mostrarLuz(index);
-    });
-});
