@@ -1,6 +1,7 @@
 const $lucesDelCiruclo = document.querySelectorAll('.piso');
 const $botones = document.querySelectorAll('.button_t')
 let contadorDeLuz = 0;
+let enMovimiento = false;
 
 const esperar = (milisegundos) => new Promise(resolve => setTimeout(resolve, milisegundos));
 
@@ -8,6 +9,10 @@ const mostrarLuz = async ( actual ) => {
     $lucesDelCiruclo[ actual ].className = 'piso';
 
     $botones.forEach(btn => btn.disabled = true);
+
+    if (enMovimiento) return
+
+    enMovimiento = true
     
     if( contadorDeLuz < actual ){
 
@@ -49,6 +54,8 @@ const mostrarLuz = async ( actual ) => {
     luzDestino.classList.remove(luzDestino.getAttribute('color'));
 
     $botones.forEach(btn => btn.disabled = false);
+
+    enMovimiento = false
    
 }
 
