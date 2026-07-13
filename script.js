@@ -29,6 +29,7 @@ const mostrarLuz = async ( actual ) => {
     } 
 
     enMovimiento = true
+    let paradasHechas = [];
     
     if( contadorDeLuz < actual ){
 
@@ -47,6 +48,8 @@ const mostrarLuz = async ( actual ) => {
             const indice = listaVisitar.indexOf( contadorDeLuz );
 
             if( indice > -1 ){
+
+                paradasHechas.push( contadorDeLuz );
 
                 $panelEstado.textContent = 'Estado: Detenido 🛑';
                 solicitudesAtendidas++;
@@ -91,6 +94,8 @@ const mostrarLuz = async ( actual ) => {
                 
                 if( indice > -1 ){
 
+                    paradasHechas.push( contadorDeLuz );
+
                     $panelEstado.textContent = 'Estado: Detenido 🛑';
                     solicitudesAtendidas++;
                     $panelSolicitudExplicada.textContent = `Detenido para tomar una solicitud que esta en el camino`;
@@ -125,6 +130,10 @@ const mostrarLuz = async ( actual ) => {
     $panelSolicitudAtendida.textContent = `Solicitdes atendidas: ${solicitudesAtendidas}`;
 
     $panelSolicitudExplicada.textContent = `ultima solicitud atendida desde ${pisoActual} para ir a ${actual}`;
+
+    if (typeof GuardarViaje === "function") {
+        GuardarViaje( pisoActual, actual, paradasHechas );
+    }
 
     pisoActual = actual;
 
