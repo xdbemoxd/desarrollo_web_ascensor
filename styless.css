@@ -54,3 +54,19 @@ body{
     background-color: #2ecc71;
     box-shadow: 0 0 10px 1px #2ecc71;
 }
+
+.caja-historial-paradas{
+    color: white; 
+    background: #222; 
+    padding: 15px;
+}
+
+.boton-regresar{
+    margin-bottom: 20px; 
+    display: block;
+}
+
+.ver-historial{
+    color: yellow; 
+    font-size: 1.2rem;
+}
