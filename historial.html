@@ -1,22 +1,33 @@
 <!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title> Historial del Ascensor </title>
-        <link rel="stylesheet" href="styless.css">
-    </head>
-    <body>
-        <div class="contenedor">
-            <h2>Historial de Viajes </h2>
-            <a class="boton-regresar" href="index.html" >Volver al Ascensor</a>
-            
-            <!-- Aquí se inyectarán los datos -->
-            <div class="caja-historial-paradas"></div>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial del Ascensor</title>
+    <link rel="stylesheet" href="styless.css">
+</head>
+
+<body>
+    <div class="contenedor">
+        <h1>Historial de Viajes</h1>
+
+        <div class="controles">
+            <a class="boton" href="index.html">Volver al Ascensor</a>
+            <button class="boton" id="btn-limpiar-historial">Limpiar historial</button>
         </div>
 
-        <!-- Solo necesitamos la base de datos aquí, no el script de las luces -->
-        <script src="baseDatos.js"></script>
-    </body>
+        <div class="caja-historial-paradas"></div>
+    </div>
+
+    <script src="baseDatos.js"></script>
+    <script>
+        document.getElementById("btn-limpiar-historial")
+            .addEventListener("click", function () {
+                if (typeof LimpiarHistorial === "function") LimpiarHistorial();
+            });
+    </script>
+</body>
+
 </html>

@@ -1,145 +1,119 @@
 var bd;
 
-function IniciarBaseDatos(){
+function IniciarBaseDatos() {
+    var solicitud = indexedDB.open("DATOS_ASCENSOR", 2);
 
-    var solicitud = indexedDB.open( "DATOS_ASCENSOR" )
-
-    solicitud.addEventListener( "error", MostrarError );
-    solicitud.addEventListener( "success", Comenzar );
-    solicitud.addEventListener( "upgradeneeded", CrearAlmacen );
-
-
+    solicitud.addEventListener("error", MostrarError);
+    solicitud.addEventListener("success", Comenzar);
+    solicitud.addEventListener("upgradeneeded", CrearAlmacen);
 }
 
-function MostrarError(evento){
-
-    alert( "Tenemos un ERROR: " + evento.code + " / " + evento.message );
-
+function MostrarError(evento) {
+    console.error("Error de IndexedDB:", evento.target.error);
 }
 
 function Comenzar(evento) {
-    
     bd = evento.target.result;
 
+    // Página de historial: pintamos la lista de viajes.
     if (document.querySelector(".caja-historial-paradas")) {
-        Mostrar(); 
-    } 
-    
-    if (document.getElementById("panel-soli-atendidas")) {
-        CargarContador(); 
+        Mostrar();
     }
-     
+
+    // Página principal: sincronizamos el contador de atendidas con lo guardado.
+    if (document.getElementById("panel-atendidas")) {
+        CargarContador();
+    }
 }
 
 function CrearAlmacen(evento) {
-    
     var baseDatos = evento.target.result;
 
     if (baseDatos.objectStoreNames.contains("ESTACIONES")) {
         baseDatos.deleteObjectStore("ESTACIONES");
     }
 
-    var almacen = baseDatos.createObjectStore( "HISTORIAL", { keyPath: "id", autoIncrement: true } );
-    almacen.createIndex( "Buscar parada", "parada", {unique : false} );
-    
+    if (!baseDatos.objectStoreNames.contains("HISTORIAL")) {
+        var almacen = baseDatos.createObjectStore("HISTORIAL", { keyPath: "id", autoIncrement: true });
+        almacen.createIndex("Buscar destino", "destino", { unique: false });
+    }
 }
 
-function GuardarViaje( origen, destino, paradas ) {
+function GuardarViaje(origen, destino) {
     if (!bd) return;
 
-    var transaccion = bd.transaction( [ "HISTORIAL" ], "readwrite" );
-    var almacen = transaccion.objectStore( "HISTORIAL" );
+    var transaccion = bd.transaction(["HISTORIAL"], "readwrite");
+    var almacen = transaccion.objectStore("HISTORIAL");
 
     almacen.add({
         origen: origen,
         destino: destino,
-        seDetuvoEnCamino: paradas.length > 0,
-        paradasRealizadas: paradas, 
-        fecha: new Date().toLocaleString() 
-    })
-
+        fecha: new Date().toLocaleString()
+    });
 }
 
 function Mostrar() {
-    var caja = document.querySelector( ".caja-historial-paradas" );
-    caja.innerHTML = ""
-
-    var transaccion = bd.transaction( [ "HISTORIAL" ] );
-
-    var almacen = transaccion.objectStore( "HISTORIAL" );
-
-    var puntero = almacen.openCursor();
-
-    puntero.addEventListener( "success", MostrarHistorial );
-
-}
-
-function MostrarHistorial(evento) {
-    var puntero = evento.target.result;
     var caja = document.querySelector(".caja-historial-paradas");
+    caja.innerHTML = "";
 
-    if (puntero) {
-
-        var textoParadas = puntero.value.seDetuvoEnCamino 
-            ? "Frenó en piso(s): " + puntero.value.paradasRealizadas.join(", ") 
-            : "Directo sin paradas";
-
-        
-        caja.innerHTML += `
-            <div style="border-bottom: 1px solid gray; padding: 10px 0;">
-                <strong>De piso ${puntero.value.origen} a ${puntero.value.destino}</strong><br>
-                <small>${textoParadas}</small><br>
-                <small style="color: gray;">${puntero.value.fecha}</small>
-            </div>
-        `;
-        
-        puntero.continue();
-    }
-
-}
-
-function CargarContador() {
-    var transaccion = bd.transaction( ["HISTORIAL"] );
+    var transaccion = bd.transaction(["HISTORIAL"]);
     var almacen = transaccion.objectStore("HISTORIAL");
-    
-    // Abrimos un cursor para revisar cada viaje guardado
     var puntero = almacen.openCursor();
-    
-    // Aquí iremos sumando todo
-    var contadorTotalSolicitudes = 0;
 
-    puntero.addEventListener("success", function(evento) {
+    var hayRegistros = false;
+
+    puntero.addEventListener("success", function (evento) {
         var cursor = evento.target.result;
-        
+
         if (cursor) {
-            // 1. Sumamos el objeto en sí (el destino final cuenta como 1 solicitud atendida)
-            var paradasEnEsteViaje = 1; 
-            
-            // 2. Sumamos la cantidad de paradas intermedias (si el arreglo existe y tiene elementos)
-            if (cursor.value.paradasRealizadas) {
-                paradasEnEsteViaje += cursor.value.paradasRealizadas.length;
-            }
-            
-            // Lo acumulamos en nuestro total
-            contadorTotalSolicitudes += paradasEnEsteViaje;
-            
-            // ¡Importante! Le decimos al cursor que pase al siguiente registro
+            hayRegistros = true;
+            caja.innerHTML += `
+                <div class="fila-historial">
+                    <strong>De ${textoPiso(cursor.value.origen)} a ${textoPiso(cursor.value.destino)}</strong><br>
+                    <small class="fecha">${cursor.value.fecha}</small>
+                </div>
+            `;
             cursor.continue();
-            
-        } else {
-            // Cuando el cursor llega al final (no hay más datos), cursor es nulo y cae en este 'else'.
-            // Es el momento exacto para actualizar el HTML.
-            var panel = document.getElementById("panel-soli-atendidas");
-            if (panel) {
-                panel.textContent = `Solicitudes atendidas: ${contadorTotalSolicitudes}`;
-            }
-            
-            // Sincronizamos la variable de tu script principal para que siga sumando desde aquí
-            if (typeof solicitudesAtendidas !== 'undefined') {
-                solicitudesAtendidas = contadorTotalSolicitudes;
-            }
+        } else if (!hayRegistros) {
+            caja.innerHTML = "<p>No hay viajes registrados todavía.</p>";
         }
     });
 }
 
-window.addEventListener( "load", IniciarBaseDatos );
+function textoPiso(n) {
+    return n === 0 ? "Planta Baja" : "Piso " + n;
+}
+
+function CargarContador() {
+    var transaccion = bd.transaction(["HISTORIAL"]);
+    var almacen = transaccion.objectStore("HISTORIAL");
+    var conteo = almacen.count();
+
+    conteo.addEventListener("success", function (evento) {
+        var total = evento.target.result;
+
+        // Sincronizamos con el estado del simulador y refrescamos la vista.
+        if (typeof estado !== "undefined") {
+            estado.atendidas = total;
+            if (typeof renderizar === "function") renderizar();
+        }
+    });
+}
+
+function LimpiarHistorial(alTerminar) {
+    if (!bd) return;
+
+    var transaccion = bd.transaction(["HISTORIAL"], "readwrite");
+    var almacen = transaccion.objectStore("HISTORIAL");
+    var peticion = almacen.clear();
+
+    peticion.addEventListener("success", function () {
+        // Si estamos en la página de historial, refrescamos la lista.
+        if (document.querySelector(".caja-historial-paradas")) {
+            Mostrar();
+        }
+        if (typeof alTerminar === "function") alTerminar();
+    });
+}
+
+window.addEventListener("load", IniciarBaseDatos);

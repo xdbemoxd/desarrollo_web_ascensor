@@ -1,48 +1,37 @@
 <!DOCTYPE html>
-<html lang="en">
-    <head>
+<html lang="es">
 
-        <meta charset="UTF-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title> Ascensor al Infierno </title>
-        <link rel="stylesheet" href="styless.css">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Ascensor</title>
+    <link rel="stylesheet" href="styless.css">
+</head>
 
-    </head>
+<body>
+    <div class="contenedor">
+        <h1>Simulador de Ascensor</h1>
 
-    <body>
-
-        <div class="contenedor">
-            <h2 id="panel-estado">Estado: Detenido 🛑</h2>
-            <div class="ascensor">
-
-                <span class="piso" color="red"></span>
-                <button class="button_t" onclick="mostrarLuz(0)">bpb</button>
-                
-                <span class="piso" color="red"></span>
-                <button class="button_t" onclick="mostrarLuz(1)">bp1</button>
-                
-                <span class="piso" color="red"></span>
-                <button class="button_t" onclick="mostrarLuz(2)">bp2</button>
-                
-                <span class="piso" color="red"></span>
-                <button class="button_t" onclick="mostrarLuz(3)">bp3</button>
-                
-                <span class="piso" color="red"></span>
-                <button class="button_t" onclick="mostrarLuz(4)">bp4</button>
-                
-                <span class="piso" color="red"></span>
-                <button class="button_t" onclick="mostrarLuz(5)">bp5</button>
-            
-            </div>
-            <h2 id="panel-soli-atendidas">Solicitdes atendidas: 0</h2>
-            <h2 id="panel-soli-espera">Solicitdes en espera: 0</h2>
-            <h2 id="panel-soli-explicada">No hay solicitudes siendo atendidas en este momento</h2>
-            <a class="ver-hitorial" href="historial.html">Ver Historial de Viajes Completo</a>
+        <div class="panel">
+            <p id="panel-estado">Estado: Detenido 🛑</p>
+            <p id="panel-piso-actual">Piso actual: 0</p>
+            <p id="panel-pendientes">Solicitudes pendientes: ninguna</p>
+            <p id="panel-atendidas">Solicitudes atendidas: 0</p>
+            <p id="panel-evento">Último evento registrado: —</p>
         </div>
 
-        <script src="script.js"></script>
-        <script src="baseDatos.js"></script>
-    </body>
+        <div id="edificio" class="ascensor"></div>
+
+        <div class="controles">
+            <a class="boton" href="historial.html">Ver historial</a>
+            <button class="boton" id="btn-limpiar">Limpiar historial</button>
+            <button class="boton" id="btn-reiniciar">Reiniciar simulador</button>
+        </div>
+    </div>
+
+    <script src="baseDatos.js"></script>
+    <script src="script.js"></script>
+</body>
 
 </html>
